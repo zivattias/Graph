@@ -29,7 +29,8 @@ class Graph:
                 self._nodes[from_node].add(node)
                 self._weights[(from_node, node)] = w
                 if not self._directed:
-                    self.add_edge(node, from_node, w)
+                    self._nodes[node].add(from_node)
+                    self._weights[(node, from_node)] = w
 
         else:
             if to_node not in self._nodes:
@@ -37,7 +38,8 @@ class Graph:
             self._nodes[from_node].add(to_node)
             self._weights[(from_node, to_node)] = weight
             if not self._directed:
-                self.add_edge(to_node, from_node, weight)
+                self._nodes[to_node].add(from_node)
+                self._weights[(to_node, from_node)] = weight
 
     def is_adjacent(self, node_1, node_2) -> int:
         if node_2 in self._nodes.get(node_1, set()):
@@ -67,9 +69,7 @@ class Graph:
                     return True
         return False
 
-    def _cheapest_path_rec(
-        self, to_node, unvisited: list, distance, previous
-    ):
+    def _cheapest_path_rec(self, to_node, unvisited: list, distance, previous):
         if len(unvisited) > 0:
             min_vertex = min(unvisited, key=lambda v: distance[v])
 
@@ -83,11 +83,15 @@ class Graph:
                     alt = distance[min_vertex] + self._weights[(min_vertex, neighbor)]
                     distance[neighbor] = alt
                     previous[neighbor] = min_vertex
-                    
+
             self._cheapest_path_rec(to_node, unvisited, distance, previous)
 
-
-        return distance[to_node], self.get_path(to_node, previous) if distance[to_node] != float("inf") else None
+        return (
+            distance[to_node],
+            self.get_path(to_node, previous)
+            if distance[to_node] != float("inf")
+            else None,
+        )
 
     def cheapest_path(self, from_node, to_node):
         distance: dict[str, float] = {}
@@ -100,17 +104,19 @@ class Graph:
 
         unvisited = list(self._nodes)
 
-        return self._cheapest_path_rec(
-            to_node, unvisited, distance, previous
-        )
+        return self._cheapest_path_rec(to_node, unvisited, distance, previous)
 
-    def _get_path_rec(self, to_node, previous: dict, current_node=None, path: Optional[list]=None):
+    def _get_path_rec(
+        self, to_node, previous: dict, current_node=None, path: Optional[list] = None
+    ):
         if not current_node:
             return " -> ".join(list(reversed(path))[1::])
 
         path.append(previous[to_node])
 
-        return self._get_path_rec(to_node=path[-1], previous=previous, current_node=path[-1], path=path)
+        return self._get_path_rec(
+            to_node=path[-1], previous=previous, current_node=path[-1], path=path
+        )
 
     def get_path(self, to_node, previous):
         current_node = to_node
@@ -118,41 +124,9 @@ class Graph:
 
         return self._get_path_rec(to_node, previous, current_node, path)
 
-        
+    # Friends-specific methods:
 
-
-if __name__ == "__main__":
-    graph = Graph(directed=True)
-    for city in (
-        "Brussels",
-        "Kyoto",
-        "Tokyo",
-        "Tel-Aviv",
-        "Amsterdam",
-        "Paris",
-        "London",
-        "Hong Kong",
-    ):
-        graph.add_node(city)
-
-    graph.add_edge("Brussels", ["Tokyo", "Tel-Aviv"], [5, 1])
-    graph.add_edge("Tokyo", ["Kyoto", "Hong Kong"], [1, 2])
-    graph.add_edge("Hong Kong", "Tel-Aviv", 7)
-    graph.add_edge("Tel-Aviv", "Paris", 2)
-    graph.add_edge("Paris", ["Tel-Aviv", "Amsterdam", "London"], [2, 1, 1])
-    # Mexico City is not initially added as a node, checking add_node within add_edge case
-    graph.add_edge("Mexico City", "Tel-Aviv", 9)
-
-    print(f"Path from Brussels to Amsterdam: {graph.dfs('Brussels', 'Amsterdam')}")
-    print(f"Path from Tokyo to Tel-Aviv: {graph.dfs('Tokyo', 'Tel-Aviv')}")
-    print(f"Path from London to Kyoto: {graph.dfs('London', 'Kyoto')}")
-    print(f"Path from Mexico City to Tel-Aviv: {graph.dfs('Mexico City', 'Tel-Aviv')}")
-    print(f"Path from Tel-Aviv to Mexico City: {graph.dfs('Tel-Aviv', 'Mexico City')} \n")
-
-    cost, trail = graph.cheapest_path('Brussels', 'Paris')
-    print(f"Cheapest path from Brussels to Paris: {cost}")
-    print(f"Path from Brussels to Paris: {trail} \n")
-
-    cost, trail = graph.cheapest_path('Brussels', 'Amsterdam')
-    print(f"Cheapest path from Brussels to Amsterdam: {cost}")
-    print(f"Path from Brussels to Amsterdam: {trail}")
+    def are_second_degree_friends(self, member1, member2) -> bool:
+        if set(self._nodes[member1]) & set(self._nodes[member2]):
+            return True
+        return False
