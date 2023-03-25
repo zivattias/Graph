@@ -124,9 +124,7 @@ class Graph:
 
         return self._get_path_rec(to_node, previous, current_node, path)
 
-    # Friends-specific methods:
-
-    def are_second_degree_friends(self, member1, member2) -> bool:
-        if set(self._nodes[member1]) & set(self._nodes[member2]):
+    def is_second_degree_related(self, from_node, to_node) -> bool:
+        if set(self._nodes[from_node]) & set(self._nodes[to_node]):
             return True
         return False
