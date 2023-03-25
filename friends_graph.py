@@ -27,7 +27,12 @@ if __name__ == "__main__":
 
     pprint(graph.get_nodes())
 
-    print(f"Are David and Jim 2nd degree related? {graph.is_second_degree_related('David', 'Jim')}")
+    print(
+        f"Are David and Jim 2nd degree related? {graph.is_second_degree_related('David', 'Jim')}"
+    )
 
-    distance, path = graph.cheapest_path("David", "Nathan")
-    print(f"Distance from David to Nathan: {distance}, path: {path}")
+    data = graph.cheapest_path("David", "Nathan")
+    if data:
+        distance = data[0]
+        path = data[1]
+        print(f"Distance from David to Nathan: {distance}, path: {path}")

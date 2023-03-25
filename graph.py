@@ -32,7 +32,7 @@ class Graph:
                     self._nodes[node].add(from_node)
                     self._weights[(node, from_node)] = w
 
-        else:
+        elif isinstance(to_node, str) and isinstance(weight, int):
             if to_node not in self._nodes:
                 self.add_node(to_node)
             self._nodes[from_node].add(to_node)
@@ -93,7 +93,7 @@ class Graph:
             else None,
         )
 
-    def cheapest_path(self, from_node, to_node):
+    def cheapest_path(self, from_node, to_node) -> Optional[tuple]:
         distance: dict[str, float] = {}
         previous: dict[str, Optional[str]] = {}
 
@@ -106,9 +106,7 @@ class Graph:
 
         return self._cheapest_path_rec(to_node, unvisited, distance, previous)
 
-    def _get_path_rec(
-        self, to_node, previous: dict, current_node=None, path: Optional[list] = None
-    ):
+    def _get_path_rec(self, to_node, previous: dict, current_node, path: list):
         if not current_node:
             return " -> ".join(list(reversed(path))[1::])
 
