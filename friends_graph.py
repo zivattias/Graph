@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     pprint(graph.get_nodes())
 
-    print(graph.are_second_degree_friends("David", "Jim"))
+    print(f"Are David and Jim 2nd degree related? {graph.is_second_degree_related('David', 'Jim')}")
 
     distance, path = graph.cheapest_path("David", "Nathan")
     print(f"Distance from David to Nathan: {distance}, path: {path}")
